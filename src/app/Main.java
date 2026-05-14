@@ -19,9 +19,6 @@ public class Main {
                 printPurchaseSuccess(balance);
             } catch (FundsException ex) {
                 System.out.println("Purchase failed. " + ex.getMessage());
-            } catch (InputMismatchException ex) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                scanner.next();
             }
 
             if (balance > 0) {
@@ -29,16 +26,21 @@ public class Main {
             }
         }
 
-        if (balance <= 0) {
+        if (balance == 0) {
             System.out.println("Balance is 0. Program finished.");
         } else {
             System.out.printf("Program finished. Final balance is USD %.2f.%n", balance);
         }
     }
 
-    private static double processPurchase(double balance, double withdrawal) throws FundsException {
-        validateAmount(balance, withdrawal);
-        return calculateBalance(balance, withdrawal);
+    private static double processPurchase(double balance, double amount) throws FundsException {
+        if (amount <= 0) {
+            throw new FundsException("Purchase amount must be greater than 0.");
+        }
+        if (amount > balance) {
+            throw new FundsException("Insufficient funds!");
+        }
+        return balance - amount;
     }
 
     private static void printPurchaseSuccess(double updatedBalance) {
@@ -51,21 +53,11 @@ public class Main {
 
     private static double getAmount(Scanner scanner) {
         System.out.print("Enter purchase amount, USD: ");
+        while (!scanner.hasNextDouble()) {
+            System.out.println("Invalid input. Please enter a valid number");
+            scanner.next();
+        }
         return scanner.nextDouble();
-    }
-
-    private static void validateAmount(double balance, double withdrawal) throws FundsException {
-        if (withdrawal <= 0) {
-            throw new FundsException("Purchase amount must be greater than 0.");
-        }
-
-        if (withdrawal > balance) {
-            throw new FundsException("Insufficient funds!");
-        }
-    }
-
-    private static double calculateBalance(double balance, double withdrawal) {
-        return balance - withdrawal;
     }
 
     private static boolean askToProceed(Scanner scanner) {
